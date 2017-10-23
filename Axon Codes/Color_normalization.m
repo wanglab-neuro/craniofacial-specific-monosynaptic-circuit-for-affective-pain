@@ -1,14 +1,14 @@
-% This code nomarlizes brightness (RGB) of images by using "Ref.jpg" as a
-% reference and flips images horizontally if the brighter side 
-% (usually the brighter side is the injected side) is on the right.
-% Prepare one nicely adjusted image (maybe by Photoshop) as a reference 
-% image and name it as Ref.jpg. For the Ref image, section with extremely 
-% bright labelling is not recommended (such as the cerebellum in which 
-% the blue channel is unsusually bright).
-% Make sure that you need to inspect all processed images to correct
-% potential errors. Sections poor labeling cannot be flipped correctly.
-% Use Padding_batch to make all images the same size. You can align your 
-% sections using StackReg in ImageJ.   
+% This code nomarlizes contrast/brightness of images by using "Ref.jpg" as a
+% reference.
+%
+% Adjust contrast/brightness of an image using Levels funtion in Photoshop 
+% or ImageJ
+%   Dragging the black point slider to the left edge of the histogram.
+%   Dragging the white point slider to the right edge of the histogram.
+%   Repeat this for all RGB chanells (unused channel must be black). 
+%   Save the adjusted image as "Ref.jpg".
+% All image files to be analyzed and "Ref.jpg" should be in the same folder
+
 
 clear
 clc
@@ -16,8 +16,9 @@ clc
 filelist = dir(['*.jpg']);
 filenames = {filelist.name}'
 nImages = length(filenames);
-Ref = imread('Ref.jpg');% put name of one image file from serial sections 
 
+% Read the adjusted reference image
+Ref = imread('Ref.jpg');
 
 Rref = Ref(:,:,1);
 Gref = Ref(:,:,2);
@@ -27,6 +28,7 @@ Rref = im2double(Rref);
 Gref = im2double(Gref);
 Bref = im2double(Bref);
 
+% normalize images
 for k = 1:nImages
     I = imread(filenames{k});
     I = im2double(I);
@@ -48,26 +50,8 @@ for k = 1:nImages
     NormB = NormB(:,:,3);
     
     NormRGB = cat(3, NormR, NormG, NormB);
-    %NormRGB = imrotate(NormRGB,-90, 'bicubic');
-    
-    % the following code determines which side (left-right) is brighter
-    % and flips images horizontally if the brighter side is on the right.
-    
-    %R = imrotate(R,-90, 'bicubic');
-    %Ibw = im2bw(R);
-    %[x, y, z] = size(R);
-    
-    %left = sum(sum(Ibw(1:x, 1:y/2)));
-    %right = sum(sum(Ibw(1:x, y/2:y)));
-    
-   % diff = left - right;
-
-    %if diff <= 0 % change here opoosite way if you want briter side on the right.
-    %   NormRGB =  flipdim(NormRGB ,2);
-   % end
-    
-    filename = ['normalized_' num2str(k,'%03u') '.jpg']; %num2str: ex, num2str(pi), str = 3.1416
+ 
+    % save normalized images
+    filename = ['normalized_' num2str(k,'%03u') '.jpg']; 
     imwrite(NormRGB,filename,'jpg','Quality',100);
 end
-
-
